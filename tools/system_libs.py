@@ -2037,15 +2037,6 @@ def process_args(args, settings):
   return args
 
 
-# get a single port
-def get_port(name, settings):
-  port = ports.ports_by_name[name]
-  if hasattr(port, "process_dependencies"):
-    port.process_dependencies(settings)
-  # ports return their output files, which will be linked, or a txt file
-  return [f for f in port.get(Ports, settings, shared) if not f.endswith('.txt')]
-
-
 def show_ports():
   print('Available ports:')
   for port in ports.ports:
