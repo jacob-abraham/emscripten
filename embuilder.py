@@ -113,8 +113,8 @@ and set up the location to the native optimizer in .emscripten
 def build_port(port_name, lib_name):
   if force:
     shared.Cache.erase_file(lib_name)
-  port = system_libs.ports.ports_by_name[port_name]
-  port.get(system_libs.Ports, shared.Settings, shared)
+
+  system_libs.build_port(port_name, shared.Settings)
 
 
 def main():
@@ -226,33 +226,43 @@ def main():
     elif what == 'sdl2':
       build_port('sdl2', libname('libSDL2'))
     elif what == 'sdl2-mt':
+      shared.Settings.USE_PTHREADS = 1
       build_port('sdl2', libname('libSDL2-mt'))
+      shared.Settings.USE_PTHREADS = 0
     elif what == 'sdl2-gfx':
-      build_port('sdl2-gfx', libname('libSDL2_gfx'))
+      build_port('sdl2_gfx', libname('libSDL2_gfx'))
     elif what == 'sdl2-image':
-      build_port('sdl2-image', libname('libSDL2_image'))
+      build_port('sdl2_image', libname('libSDL2_image'))
     elif what == 'sdl2-image-png':
-      build_port('sdl2-image', libname('libSDL2_image_png'))
+      shared.Settings.SDL2_IMAGE_FORMATS = ["png"]
+      build_port('sdl2_image', libname('libSDL2_image_png'))
+      shared.Settings.SDL2_IMAGE_FORMATS = []
     elif what == 'sdl2-image-jpg':
-      build_port('sdl2-image', libname('libSDL2_image_jpg'))
+      shared.Settings.SDL2_IMAGE_FORMATS = ["jpg"]
+      build_port('sdl2_image', libname('libSDL2_image_jpg'))
+      shared.Settings.SDL2_IMAGE_FORMATS = []
     elif what == 'sdl2-net':
-      build_port('sdl2-net', libname('libSDL2_net'))
+      build_port('sdl2_net', libname('libSDL2_net'))
     elif what == 'sdl2-mixer':
-      build_port('sdl2-mixer', libname('libSDL2_mixer'))
+      build_port('sdl2_mixer', libname('libSDL2_mixer'))
     elif what == 'freetype':
       build_port('freetype', 'libfreetype.a')
     elif what == 'harfbuzz':
       build_port('harfbuzz', 'libharfbuzz.a')
     elif what == 'harfbuzz-mt':
-      build_port('harfbuzz-mt', 'libharfbuzz-mt.a')
+      shared.Settings.USE_PTHREADS = 1
+      build_port('harfbuzz', 'libharfbuzz-mt.a')
+      shared.Settings.USE_PTHREADS = 0
     elif what == 'sdl2-ttf':
-      build_port('sdl2-ttf', libname('libSDL2_ttf'))
+      build_port('sdl2_ttf', libname('libSDL2_ttf'))
     elif what == 'cocos2d':
       build_port('cocos2d', libname('libcocos2d'))
     elif what == 'regal':
       build_port('regal', libname('libregal'))
     elif what == 'regal-mt':
-      build_port('regal', libname('libregal'))
+      shared.Settings.USE_PTHREADS = 1
+      build_port('regal', libname('libregal-mt'))
+      shared.Settings.USE_PTHREADS = 0
     elif what == 'boost_headers':
       build_port('boost_headers', libname('libboost_headers'))
     else:

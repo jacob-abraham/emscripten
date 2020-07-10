@@ -2003,22 +2003,32 @@ def dependency_order(port_list):
   return stack
 
 
-def get_needed_ports(settings):
-  # Start with directly needed ports, and transitively add dependencies
-  needed = set(p for p in ports.ports if p.needed(settings))
-
+def resolve_dependencies(port_set, settings):
   def add_deps(node):
     node.process_dependencies(settings)
     for d in node.deps:
       dep = ports.ports_by_name[d]
-      if dep not in needed:
-        needed.add(dep)
+      if dep not in port_set:
+        port_set.add(dep)
         add_deps(dep)
 
-  for port in list(needed):
+  for port in list(port_set):
     add_deps(port)
 
+
+def get_needed_ports(settings):
+  # Start with directly needed ports, and transitively add dependencies
+  needed = set(p for p in ports.ports if p.needed(settings))
+  resolve_dependencies(needed, settings)
   return needed
+
+
+def build_port(port_name, settings):
+  port = ports.ports_by_name[port_name]
+  port_set = set((port,))
+  resolve_dependencies(port_set, settings)
+  for port in dependency_order(port_set):
+    port.get(Ports, settings, shared)
 
 
 def process_args(args, settings):
