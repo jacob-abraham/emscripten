@@ -17,10 +17,8 @@ from __future__ import print_function
 import argparse
 import logging
 import os
-import subprocess
 import sys
 
-from tools import building
 from tools import shared
 from tools import system_libs
 from tools import js_optimizer
@@ -176,11 +174,15 @@ def main():
       skip_tasks = []
       if shared.Settings.RELOCATABLE:
         # we don't support PIC + pthreads yet
-        skip_tasks += [task for task in SYSTEM_TASKS + USER_TASKS if '-mt' in task or 'thread' in task]
+        for task in SYSTEM_TASKS + USER_TASKS:
+          if '-mt' in task:
+            skip_tasks.append(task)
+          if 'pthread' in task and 'stub' not in task:
+            skip_tasks.append(task)
+        print('Skipping building of %s, because we don\'t support threads and PIC code.' % ', '.join(skip_tasks))
       # cocos2d: must be ported, errors on
       # "Cannot recognize the target platform; are you targeting an unsupported platform?"
       skip_tasks += ['cocos2d']
-      print('Skipping building of %s, because WebAssembly does not support pthreads.' % ', '.join(skip_tasks))
       tasks = [x for x in tasks if x not in skip_tasks]
     else:
       if os.environ.get('EMSCRIPTEN_NATIVE_OPTIMIZER'):
